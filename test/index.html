@@ -1,0 +1,39 @@
+<!doctype html>
+<html class="no-js" lang="en-AU">
+
+<!-- This file is based off version 2.0 of Adrian's HTML5 Boilerplate at https://github.com/aidswidjaja/html5-boilerplate/ -->
+<!-- Adrian's HTML5 Boilerplate is based off HTML5 Boilerplate from H5BP, distributed initially under the MIT License -->
+<!-- Adrian's HTML5 Boilerplate is distributed under the Mozilla Public License 2.0 at https://opensource.org/licenses/MIT-->
+
+<head>
+    <meta charset="utf-8">
+    <title>death_by_code()</title>
+    <meta name="description" content="16 yo meets university-level computer science">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="apple-touch-icon" href="favicon.png">
+    <link rel="icon" type="image/png" href="favicon.png" />
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css"
+        crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://unpkg.com/sakura.css/css/sakura-dark-solarized.css" type="text/css">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+</head>
+
+<body>
+    <div id="content"></div>
+    <script>
+        // https://www.codegrepper.com/code-examples/delphi/vanilla+javascript+read+text+file+into+string
+
+        const fileUrl = 'content.md'
+
+        fetch(fileUrl)
+            .then(r => r.text())
+            .then(t => document.getElementById('content').innerHTML =
+                marked(t))
+
+    </script>
+</body>
+
+</html>

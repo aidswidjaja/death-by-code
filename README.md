@@ -4,10 +4,10 @@
 Hiya! This is my website for short snippets of code that I'll be exploring and working on over the next year. With this project I aim to document two goals I have for the upcoming year
 
 - start to introduce myself to algorithmic computer coding
-- learn about low-level languages such as C, C++ and Java
-- and begin fiddling with near-machine code such as Assembly
+- learn a lot more about lower-level languages such as C, C++ and Java
+- and begin having fun with languages such as Assembly
 
-I come from a bit-of-everything background with lots of experience in a ton of different areas — virtualisation, full stack programming, networking, sysadmin, hardware, low-level silicon, Android fun, and a lot more. But since I'm a big boi now I'd like to try my hand at some stuff I never really had the need to learn about. That would be um... that stuff I mentioned above :D
+I come from a bit-of-everything background with lots of experience in a ton of different areas — virtualisation, full stack programming, networking, sysadmin, hardware, (hard-drives), *nix, low-level silicon, Android fun, and a lot more. But since I'm a big boi now I'd like to try my hand at some stuff I never really had the need to learn about. That would be um... that stuff I mentioned above :D
 
 Some challenges I anticipate:
 

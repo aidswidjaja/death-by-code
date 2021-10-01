@@ -1,67 +1,132 @@
-<title>Combination sum | death_by_code()</title>
+<title>HireMe.c | death_by_code()</title>
 
-# Combination sum
+# HireMe.c
 
-So for my first deep dive into computer science I took a look at this question on the front of [dailycodingproblem.com](http://web.archive.org/web/20210116012845/https://www.dailycodingproblem.com/)
+HireMe.c is a challenge by Nintendo's Euroepan Research & Development organisation, available at https://www.nerd.nintendo.com/files/HireMe.html.
 
-#### Prompt
-<span>
+Solve the puzzle and you might get hired, basically.
 
-There's a staircase with N steps, and you can climb 1 or 2 steps at a time. Given N, write a function that returns the number of unique ways you can climb the staircase. The order of the steps matters. 
+Seems really difficult, but I'll give it a shot anyway. I don't expect to get very far, but close is good enough. I'll be extra verbose so I can easily pick up where I left off, in case I decide to take another one of those 5-month pauses between commits o_o
 
-For example, if N is 4, then there are 5 unique ways:
+While doing this, I did my best not to do any research specific to this particular challenge. Whatever I come up, came from my brain and the gods of Stack Overflow.
 
-```
-1, 1, 1, 1
-2, 1, 1
-1, 2, 1
-1, 1, 2
-2, 2
-```
+***
 
-What if, instead of being able to climb 1 or 2 steps at a time, you could climb any number from a set of positive integers X? For example, if X = {1, 3, 5}, you could climb 1, 3, or 5 steps at a time. 
+First, taking a look at the comment.
 
-Generalize your function to take in X. 
+> The solutions to this challenge belong to different levels :
+>
+> Level 1 : an iterative algorithm which typically takes more than a second to find a solution (for any given output). 
+>
+> Most people stop here, which is fine, but if you want to go further, there is :
+>
+> Level 2 : a non-iterative algorithm which typically takes less than a millisecond to find a solution (for any given output).
+>
+> Few people have reached this level. But if you want to beat it completely, there's yet another castle...
+>
+> Level 3 : an algorithm which can provide any of the 2^128 solutions (for any given output).
+>
+> Even fewer people have reached this final level. Congratulations to them!
 
-</span>
+So we basically have to build an algorithm which can provide our input array `u8 input[32]` for any target. Then a `memcmp()` is used to check for the first `size_t 16` bytes. If `memcmp` returns a non-zero number (e.g 0x0A) then the output (in essence, parsed input), which was diffused and confused through the random values, does not match the target.
 
-#### Exploration
-So after some quick research, this is a simple combination sum. Now mathematically it's pretty easy to calculate how **many** permutations there are, but of course, a computer wants to calculate **every single permutation**. 
+Firstly, inspecting the `Forward()` function. There are four `for` loops, 3 of which use the `u8 confusion[512]` array and 1 of which interact with the `u32 diffusion[32] array` 
 
-Now, I am too dumb to figure out the maths to write this. I don't really even know where to start. Should I do this recursively or use iteration? How would I implement an algorithm to cycle all the possibilities. Would I kill the hypothetical memory of the machine? In fact, there are many different ways to solve the combination sum - [this site](http://rosettacode.org/wiki/Count_the_coins) contains this problem solved in like a ton of different languages. Gosh imagine doing this in asm...
+```c
+typedef unsigned char u8;
+typedef unsigned int u32;
 
-So let's steal someone else's code instead. I'll use the example provided at [geeksforgeeks.org](https://www.geeksforgeeks.org/combinational-sum/)
-
-They cite this algorithmic process:
-
-> 1. Sort the array(non-decreasing).
-> 2. First remove all the duplicates from array.
-> 3. Then use recursion and backtracking to solve the problem.
->   - If at any time sub-problem sum == 0 then add that array to the result (vector of vectors).
->   - Else if sum is negative then ignore that sub-problem.
->   - Else insert the present array in that index to the current vector and call the function with sum = sum-ar[index] and index = index, then pop that element from  current index (backtrack) and call the function with sum = sum and index = index+1
-
-Ok this will be fun to untangle. Let's work through this step by step.
-
-```
-1. Sort the array(non-decreasing).
-```
-Alright, simple, that's just sorting the input array (which in our combination sum prompt == the permitted steps) from smallest to biggest. In C++ this is represented through this method:
-
-```
-vector<vector<int>> combinationSum(vector<int> &ar,
-                                int sum)
+...
+//            input     output  confusion diffusion 
+void Forward(u8 c[32],u8 d[32],u8 s[512],u32 p[32])
 {
-    // sort input array
-    sort(ar.begin(), ar.end());
+    for(u32 i=0;i<256;i++)
+    {
+        for(u8 j=0;j<32;j++)
+        {
+            d[j]=s[c[j]];
+            c[j]=0;
+        }
 
-    // remove duplicates
-    ar.erase(unique(ar.begin(), ar.end()), ar.end());
-
-    vector<int> r;
-    vector<vector<int>> res;
-    findNumbers(ar, sum, res, r, 0);
-
-    return res;
+        for(u8 j=0;j<32;j++)
+            for(u8 k=0;k<32;k++)
+                c[j]^=d[k]*((p[j]>>k)&1);
+    }
+    for(u8 i=0;i<16;i++)
+        d[i]=s[c[i*2]]^s[c[i*2+1]+256];
 }
+
 ```
+
+## Breaking the `void Forward()` function down
+
+For easy reference, I want to break `void Forward()` down into each of the four `for()` iterations. **Hex values are random**, as they are just there for just for illustration.
+
+### `d[j]=s[c[j]];`
+
+- runs for all 32 elements of `input[32]`
+
+```c
+        for(u8 j=0;j<32;j++)
+        {
+            output[j]=confusion[input[j]];
+            input[j]=0; // at the end of the loop, input[*] = 0
+        }
+```
+
+I would now like to use some tasty examples
+
+```c
+u8 input[32];
+
+int j = 3;
+
+// hence
+
+output[3] = confusion[input[3]]; 
+
+// results
+
+// input[3] = 0x4e
+// output[3] = confusion[input[3]] = confusion[0x4e] = 0x59
+```
+
+### `c[j]^=d[k]*((p[j]>>k)&1);
+
+- runs for all 32 elements of `input[32]`
+- this one's a bit of a [monster](https://open.spotify.com/track/06XQvnJb53SUYmlWIhUXUi?autoplay=true)
+- I'm actually listening to that song right now, huh
+- what a frickin nightmare... I have to reverse engineer this :sob:
+
+```c
+        for(u8 j=0;j<32;j++)
+            for(u8 k=0;k<32;k++)
+                input[j]^=output[k]*((diffusion[j]>>k)&1);
+				
+```
+
+For `input[j]^=output[k]*((diffusion[j]>>k)&1);`
+
+- let **potato** = `((diffusion[j]>>k)&1);` be:
+	- **eggplant** = take the `j`th element of `diffusion[32]`, then right shift by `k` bits
+	- perform AND between the LSB of **eggplant** and an int literal = 1
+- `output[k]` XOR **potato**
+
+#### Endianness
+
+x86 machines are **little-endian** with the LSB at the lowest address (see https://docs.oracle.com/cd/E23824_01/html/819-3196/hwovr-35423.html)
+
+```
+
++--------+--------+--------+--------+
+| byte 3 | byte 2 | byte 1 | byte 0 |
++--------+--------+--------+--------+
+| MSB    |        |        | LSB    |
++--------+--------+--------+--------+
+```
+
+
+
+
+
+

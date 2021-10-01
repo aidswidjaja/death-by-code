@@ -91,7 +91,7 @@ output[3] = confusion[input[3]];
 // output[3] = confusion[input[3]] = confusion[0x4e] = 0x59
 ```
 
-### `c[j]^=d[k]*((p[j]>>k)&1);
+### `c[j]^=d[k]*((p[j]>>k)&1);`
 
 - runs for all 32 elements of `input[32]`
 - this one's a bit of a [monster](https://open.spotify.com/track/06XQvnJb53SUYmlWIhUXUi?autoplay=true)
@@ -102,7 +102,6 @@ output[3] = confusion[input[3]];
         for(u8 j=0;j<32;j++)
             for(u8 k=0;k<32;k++)
                 input[j]^=output[k]*((diffusion[j]>>k)&1);
-				
 ```
 
 For `input[j]^=output[k]*((diffusion[j]>>k)&1);`
